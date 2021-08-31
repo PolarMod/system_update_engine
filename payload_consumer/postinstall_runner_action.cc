@@ -38,6 +38,12 @@
 #include "update_engine/common/subprocess.h"
 #include "update_engine/common/utils.h"
 
+
+#ifdef   RUN_BACKUPTOOL
+#warning "Use Android.bp to undefine RUN_BACKUPTOOL"
+#undef   RUN_BACKUPTOOL
+#endif /* RUN_BACKUPTOOL */
+
 namespace {
 
 // The file descriptor number from the postinstall program's perspective where
@@ -187,7 +193,12 @@ void PostinstallRunnerAction::PerformPartitionPostinstall() {
   }
 
   LOG(INFO) << current_device << " has been mounted R/W " << mount_count << " times.";
-
+  /* We do not need backuptool, since our updates ship vbmeta
+   * and so executing scritp wich do R/W on system partition
+   * is extremely bad idea
+   * Also only `#undef RUN_BACKUPTOOL` should work, but...I really
+   * dont' want to check whether it is included in some other part of
+   * AOSP source tree
   if (mount_count > 0) {
     // Mount the target partition R/W
     LOG(INFO) << "Running backuptool scripts";
@@ -214,7 +225,7 @@ void PostinstallRunnerAction::PerformPartitionPostinstall() {
   } else {
     LOG(INFO) << "Skipping backuptool scripts";
   }
-
+  */
   utils::UnmountFilesystem(fs_mount_dir_);
 
   // In Chromium OS, the postinstall step is allowed to write to the block
